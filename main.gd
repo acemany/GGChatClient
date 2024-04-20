@@ -7,6 +7,7 @@ extends Node
 @onready var message_container = $Main/Body/Messages
 @onready var line_edit = $Main/Footer/LineEdit
 
+@export var logging: bool = true
 @export var user_id: int
 @export var user_token: String
 #            Acemany   Degrabebs
@@ -34,10 +35,11 @@ var streamer_nick = "e8bb00"
 
 
 func _ready():
+	FileAccess.open("user://log.txt", FileAccess.WRITE)
 	add_child(smile_loader)
 	smile_loader.connect("request_completed", _http_request_completed)
 	#smile_loader.request("https://goodgame.ru/images/smiles/DegraBebs/%s.png" % smile)
-	
+
 	socket.connect_to_url("wss://chat-1.goodgame.ru/chat2/")
 	print("STARTED")
 
@@ -63,8 +65,10 @@ func _process(_delta):
 						channel_counter.text = "ጰ %s 🤖 %s" % [message_data['users_in_channel'], message_data['clients_in_channel']-message_data['users_in_channel']]
 					"channel_history":
 						for i in message_data['messages']:
+							logf("Message: %s" % i)
 							append_message(i)
 					"message":
+						logf("Message: %s" % message_data)
 						append_message(message_data)
 					"error":
 						logf("Error%s" % message_data, 2)
@@ -203,7 +207,9 @@ func _http_request_completed(_result, _response_code, _headers, body):
 	print("Code %s" % image.save_png("res://cache/name.png"))
 
 
-func logf(err: String, warn: int = 0) -> void:
+func logf(err: String, warn: int = 0) -> Error:
+	if not logging:
+		return OK
 	var warn_level = ""
 	if warn > 1:
 		warn_level = 'E'
@@ -211,5 +217,6 @@ func logf(err: String, warn: int = 0) -> void:
 		warn_level = 'W'
 	else:
 		warn_level = 'I'
-	var file = FileAccess.open("res://log.txt", FileAccess.READ_WRITE)
+	var file = FileAccess.open("user://log.txt", FileAccess.READ_WRITE)
 	file.store_string("%s\n[%s]-%s:\n%s\n" % [file.get_as_text(), warn_level, Time.get_datetime_string_from_system(), err])
+	return FileAccess.get_open_error()

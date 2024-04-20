@@ -18,6 +18,16 @@ offset_bottom = -40.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_1lj68")
+logging = false
+channel_id = "190739"
+
+[node name="Player" type="VideoStreamPlayer" parent="."]
+layout_mode = 0
+offset_left = 1034.0
+offset_right = 1680.0
+offset_bottom = 526.0
+autoplay = true
+loop = true
 
 [node name="Main" type="VBoxContainer" parent="."]
 layout_mode = 1
